@@ -1,5 +1,5 @@
 import random
-from models import PricingAction, PricingObservation, PricingState
+from model import PricingAction, PricingObservation, PricingState
 
 
 class PricingEnv:
