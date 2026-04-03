@@ -10,20 +10,31 @@ class PricingEnv:
     # -------------------------
     # RESET
     # -------------------------
-    def reset(self):
+    def reset(self, config=None):
+
+        if config is None:
+            config = {
+                "inventory": 100,
+                "base_demand": 80,
+                "max_days": 30,
+                "competitor_price": 100,
+                "demand_volatility": 5
+            }
+
         self.state = PricingState(
             day=1,
-            inventory=100,
-            max_days=30,
+            inventory=config["inventory"],
+            max_days=config["max_days"],
             last_sales=0,
             last_price=100.0,
-            competitor_price=100.0,
+            competitor_price=config["competitor_price"],
             demand_trend="stable",
-            base_demand=80.0
+            base_demand=config["base_demand"]
         )
 
-        return self._get_observation()
+        self.volatility = config["demand_volatility"]
 
+        return self._get_observation()
     # -------------------------
     # STEP
     # -------------------------
@@ -44,7 +55,7 @@ class PricingEnv:
             demand -= 5
 
         # randomness
-        demand += random.uniform(-5, 5)
+        demand += random.uniform(-self.volatility, self.volatility)
 
         demand = max(0, demand)
 
