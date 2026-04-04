@@ -11,8 +11,7 @@ class PricingEnv:
     # RESET
     # -------------------------
     def reset(self, config=None):
-
-        if config is None:
+        if not config or "inventory" not in config:
             config = {
                 "inventory": 100,
                 "base_demand": 80,
