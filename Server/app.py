@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from model import PricingAction
 from Server.pricing_env import PricingEnv
+from typing import Optional, Dict
 
 app = FastAPI()
 
@@ -12,8 +13,8 @@ env = PricingEnv()
 # RESET
 # -------------------------
 @app.post("/reset")
-def reset():
-    obs = env.reset()
+def reset(config: Optional[Dict] = None):
+    obs = env.reset(config)
     return obs.model_dump()
 
 

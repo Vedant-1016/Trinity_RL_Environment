@@ -10,8 +10,12 @@ class PricingEnvClient:
     # -------------------------
     # RESET
     # -------------------------
-    def reset(self):
-        response = requests.post(f"{self.base_url}/reset")
+    def reset(self, config=None):
+        response = requests.post(
+            f"{self.base_url}/reset",
+            json=config
+        )
+        print("CONFIG USED:", config)
         return response.json()
 
     # -------------------------

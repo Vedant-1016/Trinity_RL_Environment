@@ -10,7 +10,7 @@ def run_task(task_name):
 
     env = PricingEnvClient()
 
-    obs = env.reset()  # (later we’ll pass config via API)
+    obs = env.reset(config)
 
     total_reward = 0
     price = 100

@@ -1,1 +1,3 @@
-#Meta,Pytorch & Hugging Face Hackathon for building a real world RL environment using OpenEnv
+Dynamic Pricing & Inventory RL Environment
+
+An OpenEnv-compatible environment where agents learn to optimize pricing decisions over multiple time periods while managing limited inventory under uncertain demand.
