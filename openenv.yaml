@@ -18,3 +18,31 @@ models:
   action: PricingAction
   observation: PricingObservation
   state: PricingState
+
+tasks:
+  - name: easy
+    description: Low volatility demand, stable environment
+    config:
+      inventory: 120
+      base_demand: 100
+      max_days: 20
+      competitor_price: 100
+      demand_volatility: 2
+
+  - name: medium
+    description: Moderate uncertainty in demand
+    config:
+      inventory: 100
+      base_demand: 80
+      max_days: 30
+      competitor_price: 100
+      demand_volatility: 5
+
+  - name: hard
+    description: High volatility and competitive pricing dynamics
+    config:
+      inventory: 80
+      base_demand: 60
+      max_days: 40
+      competitor_price: 110
+      demand_volatility: 10
