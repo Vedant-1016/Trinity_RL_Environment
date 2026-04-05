@@ -17,7 +17,9 @@ def reset(config: Optional[Dict] = None):
     obs = env.reset(config)
     return obs.model_dump()
 
-
+@app.get("/")
+def home():
+    return {"message": "Pricing Environment API is running 🚀"}
 # -------------------------
 # STEP
 # -------------------------
