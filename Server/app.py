@@ -19,7 +19,11 @@ def reset(config: Optional[Dict] = None):
 
 @app.get("/")
 def home():
-    return {"message": "Pricing Environment API is running 🚀"}
+    return {
+        "message": "Pricing Environment API 🚀",
+        "docs": "https://vedant-10-pricing-environment.hf.space/docs",
+        "usage": "Use /reset and /step endpoints"
+    }
 # -------------------------
 # STEP
 # -------------------------
