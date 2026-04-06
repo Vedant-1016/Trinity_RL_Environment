@@ -9,312 +9,272 @@ app_port: 8000
 
 ---
 
+---
 title: Pricing Environment
 emoji: 🚀
 colorFrom: blue
 colorTo: green
 sdk: docker
 app_port: 8000
---------------
+-------------
 
-# 🚀 Dynamic Pricing & Inventory RL Environment
+# 📈 Dynamic Pricing RL Environment
 
----
+## 🧠 Overview
 
-## 🔗 Live Demo
+This project implements a **real-world reinforcement learning environment** for:
 
-* 🌐 **API Base URL:** https://vedant-10-pricing-environment.hf.space
-* 📄 **Interactive Docs (Recommended):** https://vedant-10-pricing-environment.hf.space/docs
+> **Dynamic Pricing + Multi-Period Inventory Management**
 
-> ⚠️ Open `/docs` to interact with the environment easily.
+An agent must dynamically set product prices over time to **maximize total profit**, while adapting to:
 
----
-
-## 📌 Overview
-
-This project implements a **reinforcement learning (RL) environment** that simulates a real-world business scenario:
-
-> **How should a company dynamically set prices over time while managing limited inventory to maximize total profit?**
-
-Unlike static prediction systems, this environment models **sequential decision-making**, where actions taken today directly influence future outcomes.
+* Changing demand
+* Competitor pricing
+* Inventory constraints
+* Market uncertainty
 
 ---
 
-## 🎯 Problem Statement
+## 🎯 Motivation
 
-Businesses in domains like e-commerce, airlines, and retail must:
+Pricing is a core real-world decision problem in:
 
-* Set optimal prices
-* Manage limited inventory
-* Handle uncertain demand
-* Compete with market fluctuations
+* E-commerce platforms
+* Airline ticketing systems
+* Retail inventory management
 
-### ❗ Challenges:
+Unlike toy RL environments, this environment introduces:
 
-* Demand is **stochastic (uncertain)**
-* Decisions are **interdependent over time**
-* Short-term gains can hurt long-term profit
-
----
-
-## 💡 Our Solution
-
-We built a **deployable RL environment** where agents learn:
-
-> **Optimal pricing strategies under uncertainty and inventory constraints**
-
----
-
-## 🧠 Why Reinforcement Learning?
-
-This problem naturally fits RL because:
-
-* 📈 Sequential decisions
-* ⏳ Delayed rewards
-* 🎲 Uncertainty in demand
-* ⚖️ Trade-off between short-term vs long-term profit
+* **Partial observability** (hidden demand factors)
+* **Stochastic demand** (randomness)
+* **Multi-step dependencies** (decisions affect future states)
 
 ---
 
 ## ⚙️ Environment Design
 
----
+### 🟢 Action Space
 
-### 🔹 Observation (Agent View)
-
-The agent receives:
-
-```text
-day, inventory, last_sales, last_price, competitor_price, demand_trend
+```python
+price: float
 ```
 
----
-
-### 🔹 Action
-
-```text
-Set price of product
-```
-
-Example:
-
-```json
-{ "price": 100 }
-```
+The agent selects a price at each timestep.
 
 ---
 
-### 🔹 Hidden State (Environment Only)
+### 🔵 Observation Space
 
-* Base demand
-* Demand volatility
-* Internal dynamics
+```python
+{
+  "day": int,
+  "inventory": int,
+  "last_sales": int,
+  "last_price": float,
+  "competitor_price": float,
+  "demand_trend": str
+}
+```
 
-👉 Simulates real-world uncertainty
+The agent observes:
+
+* Current day
+* Remaining inventory
+* Previous sales
+* Competitor pricing
+* Demand trend
 
 ---
 
-### 🔹 Transition Dynamics
+### 🔒 Hidden State (Not Visible to Agent)
 
-At each step:
-
-1. Demand is simulated:
-
-```text
-demand = base_demand - (price effect) + randomness
+```python
+{
+  "base_demand": float,
+  "demand_volatility": float
+}
 ```
 
-2. Sales are computed:
-
-```text
-sales = min(demand, inventory)
-```
-
-3. Environment updates:
-
-* Inventory decreases
-* Day increments
-* Competitor price fluctuates
-* Demand trend updates
+These hidden variables make the environment realistic and non-trivial.
 
 ---
 
-### 🔹 Reward Function
+## 🔁 API Endpoints
 
-```text
-reward = price × sales
-```
-
-👉 Represents **profit**
-
----
-
-### 🔹 Episode Ends When
-
-* Inventory = 0
-* OR max days reached
-
----
-
-## 🔄 Interaction Flow
-
-```text
-Agent → Action (price) → Environment → Demand → Sales → Reward → Next State
-```
+| Endpoint | Method | Description         |
+| -------- | ------ | ------------------- |
+| `/reset` | POST   | Reset environment   |
+| `/step`  | POST   | Execute action      |
+| `/state` | GET    | Full internal state |
 
 ---
 
 ## 🧪 Tasks (Difficulty Levels)
 
-| Level  | Description                          |
-| ------ | ------------------------------------ |
-| Easy   | Stable demand, low volatility        |
-| Medium | Moderate uncertainty                 |
-| Hard   | High volatility + competitor effects |
+### 🟢 Easy
+
+* High demand
+* Low volatility
+* Short time horizon
+
+### 🟡 Medium
+
+* Moderate uncertainty
+* Balanced conditions
+
+### 🔴 Hard
+
+* High volatility
+* Competitive pricing pressure
+* Long horizon
 
 ---
 
-## 🌍 Real-World Applications
+## 🧮 Evaluation / Grading
 
-* 🛒 E-commerce pricing
-* ✈️ Airline ticket pricing
-* 🏬 Retail inventory optimization
-* 📦 Supply chain management
-
----
-
-## 🌐 API Usage
-
----
-
-### 🔹 Reset Environment
-
-```http
-POST /reset
-```
-
----
-
-### 🔹 Take Action
-
-```http
-POST /step
-```
-
-Example:
-
-```json
-{
-  "price": 100
-}
-```
-
----
-
-### 🔹 Get State
-
-```http
-GET /state
-```
-
----
-
-## 🏗️ System Architecture
-
-```text
-Agent
-  ↓
-Client (HTTP)
-  ↓
-FastAPI Server
-  ↓
-Pricing Environment
-  ↓
-Reward + Observation
-```
-
----
-
-## 🛠️ Tech Stack
-
-* FastAPI
-* Pydantic
-* Docker
-* Hugging Face Spaces
-
----
-
-## 🚀 Key Highlights
-
-✅ Fully deployable RL environment
-✅ Real-world economic simulation
-✅ Multi-period decision-making
-✅ Supports agent benchmarking
-✅ Public API for global access
-
----
-
-## 🧠 What Makes This Unique
-
-Unlike toy environments, this system:
-
-* Models **real business decision-making**
-* Captures **long-term effects of actions**
-* Includes **uncertainty and competition**
-* Is **production-ready and deployable**
-
----
-
-## 🧪 Example Usage
+Each agent is evaluated using a deterministic grading function:
 
 ```python
-import requests
+def compute_score(total_profit, max_possible_profit):
+    score = total_profit / max_possible_profit
+    return max(0.0, min(score, 1.0))
+```
 
-url = "https://vedant-10-pricing-environment.hf.space"
+### ✔ Properties:
 
-# Reset
-r = requests.post(f"{url}/reset")
-print(r.json())
+* Normalized score (0 → 1)
+* Comparable across tasks
+* Reproducible evaluation
 
-# Step
-r = requests.post(f"{url}/step", json={"price": 100})
-print(r.json())
+---
+
+## 💰 Reward Function
+
+At each timestep:
+
+```python
+reward = price * sales
+```
+
+### Why this works:
+
+* Encourages profit maximization
+* Penalizes poor pricing decisions
+* Provides continuous learning signal
+
+---
+
+## 🤖 Baseline Agent
+
+A simple heuristic agent:
+
+* Adjusts price based on demand trend
+* Reacts to competitor price
+* Demonstrates environment usage
+
+---
+
+## 📊 Baseline Results
+
+| Task   | Profit | Score |
+| ------ | ------ | ----- |
+| Easy   | ~5700  | ~0.57 |
+| Medium | ~4800  | ~0.48 |
+| Hard   | ~3900  | ~0.39 |
+
+---
+
+## 🚀 How to Run Locally
+
+### 1. Clone Repository
+
+```bash
+git clone <your-repo-url>
+cd Trinity_RL_Environment
 ```
 
 ---
 
-## 🐳 Run Locally with Docker
+### 2. Start Server
+
+```bash
+uvicorn Server.app:app --reload
+```
+
+Open API docs:
+
+👉 http://127.0.0.1:8000/docs
+
+---
+
+### 3. Test Environment
+
+```bash
+python client_test.py
+```
+
+---
+
+### 4. Run Baseline Agent
+
+```bash
+python inference.py
+```
+
+---
+
+## 🐳 Docker Setup
+
+### Build
 
 ```bash
 docker build -t pricing-env .
+```
+
+### Run
+
+```bash
 docker run -p 8000:8000 pricing-env
 ```
 
 ---
 
-## 🔮 Future Improvements
+## 🌐 Deployment
 
-* Multi-agent competition
-* Regional pricing strategies
-* Real-world dataset integration
-* Advanced demand modeling
+Live deployed environment:
+
+👉 https://vedant-10-pricing-environment.hf.space/docs
+
+---
+
+## 🧩 OpenEnv Compliance
+
+This environment fully satisfies:
+
+* Typed models (Pydantic)
+* step(), reset(), state() API
+* openenv.yaml specification
+* Multi-task setup (easy → medium → hard)
+* Deterministic grading
+* Dockerized deployment
+
+---
+
+## 💡 Key Highlights
+
+* Real-world RL problem (not a toy environment)
+* Partial observability
+* Stochastic demand modeling
+* Multi-task evaluation
+* API-first design
 
 ---
 
 ## 🏁 Conclusion
 
-This project demonstrates how reinforcement learning can be applied to **real-world economic systems**, enabling intelligent agents to make optimal sequential decisions under uncertainty.
+This project demonstrates how reinforcement learning can be applied to **real-world economic decision-making**, specifically pricing optimization.
+
+It provides a scalable and realistic benchmark for evaluating intelligent agents.
 
 ---
 
-## ⚡ Quick Note for Judges
-
-👉 Open the docs directly:
-
-```text
-https://vedant-10-pricing-environment.hf.space/docs
-```
-
----
-
-# 🚀 Built for OpenEnv Hackathon
