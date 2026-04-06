@@ -18,220 +18,254 @@ sdk: docker
 app_port: 8000
 -------------
 
-# 📈 Dynamic Pricing RL Environment
+# 🚀 Pricing Environment (OpenEnv RL Benchmark)
 
-## 🧠 Overview
+## 📌 Overview
 
-This project implements a **real-world reinforcement learning environment** for:
+This project implements a **real-world Reinforcement Learning environment** for:
 
-> **Dynamic Pricing + Multi-Period Inventory Management**
+> **Dynamic Pricing with Multi-Period Inventory Management**
 
-An agent must dynamically set product prices over time to **maximize total profit**, while adapting to:
+The goal is to simulate how an intelligent agent adjusts product pricing over time to **maximize total profit** under:
 
-* Changing demand
-* Competitor pricing
 * Inventory constraints
-* Market uncertainty
+* Demand fluctuations
+* Competitor pricing
+* Market volatility
 
 ---
 
 ## 🎯 Motivation
 
-Pricing is a core real-world decision problem in:
+Dynamic pricing is a core problem in:
 
-* E-commerce platforms
-* Airline ticketing systems
+* E-commerce platforms (Amazon, Flipkart)
+* Airline ticket pricing
+* Ride-sharing (Uber surge pricing)
 * Retail inventory management
 
-Unlike toy RL environments, this environment introduces:
-
-* **Partial observability** (hidden demand factors)
-* **Stochastic demand** (randomness)
-* **Multi-step dependencies** (decisions affect future states)
+This environment provides a **structured benchmark** to evaluate agents on such real-world decision-making tasks.
 
 ---
 
 ## ⚙️ Environment Design
 
-### 🟢 Action Space
+### 📊 State (Observation)
 
-```python
-price: float
-```
+Each step returns:
 
-The agent selects a price at each timestep.
-
----
-
-### 🔵 Observation Space
-
-```python
+```json
 {
   "day": int,
   "inventory": int,
   "last_sales": int,
   "last_price": float,
   "competitor_price": float,
-  "demand_trend": str
+  "demand_trend": "increasing" | "decreasing" | "stable"
 }
 ```
 
-The agent observes:
-
-* Current day
-* Remaining inventory
-* Previous sales
-* Competitor pricing
-* Demand trend
-
 ---
 
-### 🔒 Hidden State (Not Visible to Agent)
+### 🎮 Action Space
 
-```python
+```json
 {
-  "base_demand": float,
-  "demand_volatility": float
+  "price": float
 }
 ```
 
-These hidden variables make the environment realistic and non-trivial.
+* Range: `[10, 200]`
+* Agent decides product price at each timestep
 
 ---
 
-## 🔁 API Endpoints
+### 💰 Reward Function
 
-| Endpoint | Method | Description         |
-| -------- | ------ | ------------------- |
-| `/reset` | POST   | Reset environment   |
-| `/step`  | POST   | Execute action      |
-| `/state` | GET    | Full internal state |
-
----
-
-## 🧪 Tasks (Difficulty Levels)
-
-### 🟢 Easy
-
-* High demand
-* Low volatility
-* Short time horizon
-
-### 🟡 Medium
-
-* Moderate uncertainty
-* Balanced conditions
-
-### 🔴 Hard
-
-* High volatility
-* Competitive pricing pressure
-* Long horizon
-
----
-
-## 🧮 Evaluation / Grading
-
-Each agent is evaluated using a deterministic grading function:
-
-```python
-def compute_score(total_profit, max_possible_profit):
-    score = total_profit / max_possible_profit
-    return max(0.0, min(score, 1.0))
+```text
+reward = price × units_sold
 ```
 
-### ✔ Properties:
+Where demand depends on:
 
-* Normalized score (0 → 1)
-* Comparable across tasks
-* Reproducible evaluation
+* Price elasticity
+* Competitor price
+* Demand trend
+* Random volatility
+
+✔ Encourages profit maximization
+✔ Provides **dense reward signal**
+✔ Penalizes poor pricing strategies
 
 ---
 
-## 💰 Reward Function
+### ⛔ Episode Termination
 
-At each timestep:
+Episode ends when:
 
-```python
-reward = price * sales
+* Inventory = 0
+* OR max_days reached
+
+---
+
+## 🧠 Tasks & Difficulty Levels
+
+| Task   | Description                                     |
+| ------ | ----------------------------------------------- |
+| Easy   | High demand, low volatility                     |
+| Medium | Moderate demand & volatility                    |
+| Hard   | Low demand, high volatility, strong competition |
+
+Each task has different:
+
+* Inventory
+* Demand
+* Competitor behavior
+* Volatility
+
+---
+
+## 🧮 Scoring (Grader)
+
+Score is normalized:
+
+```text
+score = total_profit / max_profit
 ```
 
-### Why this works:
+Where:
 
-* Encourages profit maximization
-* Penalizes poor pricing decisions
-* Provides continuous learning signal
+```python
+max_profit = {
+    "easy": 15000,
+    "medium": 12000,
+    "hard": 8000
+}[task_name]
+```
+
+✔ Ensures score ∈ [0, 1]
+✔ Allows fair comparison across tasks
 
 ---
 
 ## 🤖 Baseline Agent
 
-A simple heuristic agent:
+A simple **rule-based agent** is provided:
 
-* Adjusts price based on demand trend
-* Reacts to competitor price
-* Demonstrates environment usage
+```text
+- Increase price if sales are high
+- Decrease price if sales are low
+```
 
----
-
-## 📊 Baseline Results
-
-| Task   | Profit | Score |
-| ------ | ------ | ----- |
-| Easy   | ~5700  | ~0.57 |
-| Medium | ~4800  | ~0.48 |
-| Hard   | ~3900  | ~0.39 |
+✔ No LLM required
+✔ Deterministic & reproducible
+✔ Serves as baseline for evaluation
 
 ---
 
-## 🚀 How to Run Locally
+## 🧪 Inference Script
 
-### 1. Clone Repository
+The `inference.py` script:
 
-```bash
-git clone <your-repo-url>
-cd Trinity_RL_Environment
+* Runs all 3 tasks: easy → medium → hard
+* Interacts with deployed API
+* Logs structured outputs
+
+---
+
+### 📤 Required Output Format
+
+```text
+[START] task=<task_name> env=pricing-env model=<model_name>
+
+[STEP] step=<n> action=price(x) reward=0.00 done=false error=null
+
+[END] success=true steps=<n> score=<score> rewards=r1,r2,...
+```
+
+✔ Strictly follows OpenEnv spec
+✔ Used for automated evaluation
+
+---
+
+## 🌐 API Endpoints
+
+Base URL:
+
+```text
+https://vedant-10-pricing-environment.hf.space
 ```
 
 ---
 
-### 2. Start Server
+### 🔹 Reset
 
-```bash
-uvicorn Server.app:app --reload
+```http
+POST /reset
 ```
 
-Open API docs:
-
-👉 http://127.0.0.1:8000/docs
+Resets environment and returns initial state.
 
 ---
 
-### 3. Test Environment
+### 🔹 Step
 
-```bash
-python client_test.py
+```http
+POST /step
+```
+
+Takes action:
+
+```json
+{
+  "price": 100
+}
+```
+
+Returns:
+
+```json
+{
+  "observation": {...},
+  "reward": float,
+  "done": bool,
+  "info": {}
+}
 ```
 
 ---
 
-### 4. Run Baseline Agent
+### 🔹 State
 
-```bash
-python inference.py
+```http
+GET /state
+```
+
+Returns current environment state.
+
+---
+
+### 🔹 Interactive Docs
+
+👉 Visit:
+
+```text
+https://vedant-10-pricing-environment.hf.space/docs
 ```
 
 ---
 
-## 🐳 Docker Setup
+## 🐳 Docker Support
 
-### Build
+The project includes a working Dockerfile.
+
+### Build:
 
 ```bash
 docker build -t pricing-env .
 ```
 
-### Run
+### Run:
 
 ```bash
 docker run -p 8000:8000 pricing-env
@@ -239,42 +273,96 @@ docker run -p 8000:8000 pricing-env
 
 ---
 
-## 🌐 Deployment
+## 📦 Project Structure
 
-Live deployed environment:
+```text
+Server/
+  ├── app.py
+  ├── pricing_env.py
 
-👉 https://vedant-10-pricing-environment.hf.space/docs
+client.py
+inference.py
+grader.py
+tasks.py
+model.py
+openenv.yaml
+requirements.txt
+Dockerfile
+README.md
+```
 
 ---
 
-## 🧩 OpenEnv Compliance
+## 📄 OpenEnv Compliance
 
-This environment fully satisfies:
-
-* Typed models (Pydantic)
-* step(), reset(), state() API
-* openenv.yaml specification
-* Multi-task setup (easy → medium → hard)
-* Deterministic grading
-* Dockerized deployment
+✔ Typed models (Pydantic)
+✔ step / reset / state endpoints
+✔ openenv.yaml specification
+✔ Structured logging
+✔ 3 tasks with graders
+✔ Score normalized in [0, 1]
 
 ---
 
-## 💡 Key Highlights
+## 🔧 Environment Variables
 
-* Real-world RL problem (not a toy environment)
-* Partial observability
-* Stochastic demand modeling
-* Multi-task evaluation
-* API-first design
+```python
+API_BASE_URL = os.getenv("API_BASE_URL", "https://vedant-10-pricing-environment.hf.space")
+MODEL_NAME = os.getenv("MODEL_NAME", "pricing-agent")
+HF_TOKEN = os.getenv("HF_TOKEN")
+```
+
+---
+
+## ⚠️ Notes
+
+* Baseline agent is **rule-based (no LLM required)**
+* API is publicly accessible
+* All tasks are deterministic given same conditions
+
+---
+
+## 🧪 Sample Output
+
+```text
+[START] task=easy env=pricing-env model=pricing-agent
+[STEP] step=1 action=price(95) reward=2745.00 done=false error=null
+[STEP] step=2 action=price(100) reward=2900.00 done=false error=null
+[STEP] step=3 action=price(105) reward=55.00 done=true error=null
+[END] success=true steps=3 score=0.570 rewards=2745.00,2900.00,55.00
+```
 
 ---
 
 ## 🏁 Conclusion
 
-This project demonstrates how reinforcement learning can be applied to **real-world economic decision-making**, specifically pricing optimization.
+This project provides a **realistic RL benchmark** for pricing strategies with:
 
-It provides a scalable and realistic benchmark for evaluating intelligent agents.
+* Economic realism
+* Clear reward signals
+* Scalable difficulty
+* Full API-based interaction
+
+It is designed for:
+
+✔ Evaluating RL agents
+✔ Benchmarking decision-making systems
+✔ Extending to advanced learning algorithms
 
 ---
 
+## 🚀 Future Work
+
+* RL-based agents (Q-learning / PPO)
+* Multi-product pricing
+* Demand forecasting integration
+* Real-time dashboards
+
+---
+
+## 👨‍💻 Author
+
+Vedant Shah
+AI / ML | RL | Systems Design
+
+---
