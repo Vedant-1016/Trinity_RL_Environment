@@ -2,9 +2,16 @@ import requests
 from model import PricingAction
 
 
+import os
+
 class PricingEnvClient:
 
-    def __init__(self, base_url="http://127.0.0.1:8000"):
+    def __init__(self, base_url=None):
+        if base_url is None:
+            base_url = os.getenv(
+                "API_BASE_URL",
+                "https://vedant-10-pricing-environment.hf.space"
+            )
         self.base_url = base_url
 
     # -------------------------
