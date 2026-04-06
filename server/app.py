@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+import uvicorn
 from model import PricingAction
 from server.pricing_env import PricingEnv
 from typing import Optional, Dict
@@ -45,3 +46,18 @@ def step(action: PricingAction):
 @app.get("/state")
 def state():
     return env.state.model_dump()
+
+def main():
+    uvicorn.run(
+        "server.app:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=False
+    )
+
+
+# -----------------------
+# REQUIRED ENTRYPOINT
+# -----------------------
+if __name__ == "__main__":
+    main()
