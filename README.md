@@ -268,7 +268,7 @@ docker run -p 8000:8000 pricing-env
 ## 📦 Project Structure
 
 ```text
-Server/
+server/
   ├── app.py
   ├── pricing_env.py
 

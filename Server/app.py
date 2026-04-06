@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from model import PricingAction
-from Server.pricing_env import PricingEnv
+from server.pricing_env import PricingEnv
 from typing import Optional, Dict
 
 app = FastAPI()
