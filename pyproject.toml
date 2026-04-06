@@ -1,0 +1,13 @@
+[project]
+name = "pricing-env"
+version = "0.1.0"
+description = "Dynamic pricing RL environment"
+authors = [{name = "Vedant Shah"}]
+requires-python = ">=3.10"
+
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "requests"
+]
