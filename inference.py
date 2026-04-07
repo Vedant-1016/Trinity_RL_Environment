@@ -3,10 +3,16 @@ from model import PricingAction
 from tasks import get_task_config
 from grader import compute_score
 import os
+from openai import OpenAI
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://vedant-10-pricing-environment.hf.space")
 MODEL_NAME = os.getenv("MODEL_NAME", "pricing-agent")
 HF_TOKEN = os.getenv("HF_TOKEN")
+
+client = OpenAI(
+    base_url=os.getenv("API_BASE_URL"),
+    api_key=os.getenv("API_KEY")
+)
 
 BENCHMARK = "pricing-env"
 
@@ -30,16 +36,34 @@ def run_task(task_name):
         price = 100
         step_count = 0
         
-        MAX_STEPS = 40
+        MAX_STEPS = 30
         while step_count < MAX_STEPS:
 
             # ✅ SAFE EXTRACTION
             last_sales = obs.get("last_sales", 0)
 
-            if last_sales > 20:
-                price += 5
-            elif last_sales < 10:
-                price -= 5
+            try:
+                response = client.chat.completions.create(
+                    model=MODEL_NAME,
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a pricing agent. Suggest a price between 10 and 200."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Last sales: {last_sales}, current price: {price}"
+                        }
+                    ],
+                    temperature=0.2,
+                    max_tokens=10
+                )
+
+                suggested_price = int(response.choices[0].message.content.strip())
+                price = max(10, min(suggested_price, 200))
+
+            except Exception:
+                pass  # fallback to previous price
 
             price = max(10, min(price, 200))
 
