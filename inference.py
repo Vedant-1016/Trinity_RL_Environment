@@ -29,8 +29,9 @@ def run_task(task_name):
         rewards = []
         price = 100
         step_count = 0
-
-        while True:
+        
+        MAX_STEPS = 40
+        while step_count < MAX_STEPS:
 
             # ✅ SAFE EXTRACTION
             last_sales = obs.get("last_sales", 0)
