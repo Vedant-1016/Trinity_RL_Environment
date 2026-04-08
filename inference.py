@@ -108,11 +108,19 @@ def run_task(task_name):
 
         score = compute_score(total_reward, max_profit)
 
+# 🔥 FORCE SAFE RANGE (VERY IMPORTANT)
+        epsilon = 1e-4
+        score = max(epsilon, min(score, 1 - epsilon))
+
         success = score > 0.0
+
         rewards_str = ",".join(f"{r:.2f}" for r in rewards)
 
         print(
-            f"[END] success={str(success).lower()} steps={step_count} score={score:.3f} rewards={rewards_str}",
+            f"[END] success={str(success).lower()} "
+            f"steps={step_count} "
+            f"score={score:.6f} "
+            f"rewards={rewards_str}",
             flush=True
         )
 

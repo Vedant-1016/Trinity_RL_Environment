@@ -1,21 +1,14 @@
 def compute_score(total_profit, max_possible_profit):
+    """
+    Computes normalized score.
+    """
 
-    epsilon = 1e-6
-
-    # 🛑 avoid division issues
     if max_possible_profit <= 0:
-        return epsilon
+        return 0.0
 
-    score = total_profit / max_possible_profit
-
-    # 🛑 handle NaN or weird values
-    if not isinstance(score, (int, float)):
-        return epsilon
-
-    # 🛑 clamp strictly inside (0,1)
-    if score <= 0:
-        return epsilon
-    if score >= 1:
-        return 1.0 - epsilon
+    try:
+        score = float(total_profit) / float(max_possible_profit)
+    except Exception:
+        return 0.0
 
     return score
